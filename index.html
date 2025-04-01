@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPA Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            margin: auto;
+        }
+        input[type="number"] {
+            width: 50px;
+            padding: 10px;
+        }
+        .slider {
+            width: 100%;
+        }
+        .result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        select {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>GPA Calculator</h2>
+    <label for="semesterSelect">Select Semester:</label>
+    <select id="semesterSelect" onchange="loadSubjects()">
+        <option value="1">Semester 1</option>
+        <option value="2">Semester 2</option>
+    </select>
+    <table id="subjectsTable" border="1" width="100%">
+        <tr>
+            <th>Subject</th>
+            <th>Grade Point</th>
+            <th>Credit</th>
+        </tr>
+    </table>
+    <div class="result" id="gpaResult">GPA: 0.00</div>
+</div>
+
+<script>
+    const semesterSubjects = {
+        1: [
+            { subname: "Physics Laboratory", credit: 1 },
+            { subname: "Mathematics 1", credit: 4 },
+            { subname: "Engineering Mechanics Laboratory", credit: 1 },
+            { subname: "Physics", credit: 3 },
+            { subname: "Physical Education", credit: 1 },
+            { subname: "Computer Programming Laboratory", credit: 1 },
+            { subname: "Communication Skill", credit: 1 },
+            { subname: "Engineering Graphics Laboratory", credit: 1 },
+            { subname: "Engineering Graphics", credit: 1 },
+            { subname: "Computer Programming & Problem Solving", credit: 2 },
+            { subname: "Engineering Mechanics", credit: 4 }
+        ],
+        2: [
+            { subname: "Mathematics II", credit: 4 },
+            { subname: "Engineering Chemistry", credit: 3 },
+            { subname: "Basic Electrical & Electronics Engineering", credit: 4 },
+            { subname: "Manufacturing Science", credit: 1 },
+            { subname: "Environmental Science", credit: 2 },
+            { subname: "Biology for Engineers", credit: 2 },
+            { subname: "Engineering Chemistry", credit: 1 },
+            { subname: "Basic Electrical & Electronics Engineering Laboratory", credit: 1 },
+            { subname: "MS Lab", credit: 1 },
+            { subname: "Language Laboratory", credit: 1 },
+            { subname: "NSS / Yoga", credit: 1 }
+        ]
+    };
+
+    const gradeMap = {10: "A+", 9: "A", 8: "B+", 7: "B", 6: "C", 5: "D", 4: "S", 3: "F", 2: "F", 1: "F", 0: "F"};
+
+    function loadSubjects() {
+        const semester = document.getElementById("semesterSelect").value;
+        const subjects = semesterSubjects[semester];
+        let table = document.getElementById("subjectsTable");
+
+        // Clear existing rows except the header
+        table.innerHTML = `<tr>
+            <th>Subject</th>
+            <th>Grade Point</th>
+            <th>Credit</th>
+        </tr>`;
+
+        subjects.forEach((subject, index) => {
+            let row = table.insertRow();
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+
+            cell1.innerText = subject.subname;
+            cell2.innerHTML = `<input type="range" min="0" max="10" value="10" class="slider" id="gp${index}" oninput="updateGPA()"> <span id="gpVal${index}">10 A+</span>`;
+            cell3.innerText = subject.credit;
+        });
+
+        updateGPA();
+    }
+
+    function updateGPA() {
+        const semester = document.getElementById("semesterSelect").value;
+        const subjects = semesterSubjects[semester];
+
+        let totalGradePoints = 0;
+        let totalCredits = 0;
+
+        subjects.forEach((subject, index) => {
+            let gp = document.getElementById(`gp${index}`).value;
+            document.getElementById(`gpVal${index}`).innerText = gp + " " + gradeMap[gp];
+            totalGradePoints += gp * subject.credit;
+            totalCredits += subject.credit;
+        });
+
+        let gpa = (totalGradePoints / totalCredits).toFixed(2);
+        document.getElementById("gpaResult").innerText = `GPA: ${gpa}`;
+    }
+
+    // Load semester 1 by default
+    loadSubjects();
+</script>
+</body>
+</html>
