@@ -57,11 +57,12 @@
 </head>
 <body>
 <div class="container">
-    <h4>First Year GPA Calculator - Anuj S ECE</h4>
+    <h4>SGPA Calculator - Anuj S ECE</h4>
     <label for="semesterSelect">Select Semester:</label>
     <select id="semesterSelect" onchange="loadSubjects()">
         <option value="1">Semester 1</option>
         <option value="2">Semester 2</option>
+        <option value="3">Semester 3 ECE</option>
     </select>
     <table id="subjectsTable" border="1" width="100%">
         <tr>
@@ -100,7 +101,20 @@
             { subname: "MS Lab", credit: 1 },
             { subname: "Language Laboratory", credit: 1 },
             { subname: "NSS / Yoga", credit: 1 }
+        ],
+        3 : [
+            { subname: 'Network Analysis and Synthesis', credit: 3 },
+            { subname: 'Digital Circuit Design', credit: 3 },
+            { subname: 'Electronic Circuits and Devices', credit: 3 },
+            { subname: 'Signals & Systems', credit: 3 },
+            { subname: 'Professional Practices', credit: 2 },
+            { subname: 'Fundamental of Design Methods', credit: 3 },
+            { subname: 'Applied Numerical Methods', credit: 4 },
+            { subname: 'Network Lab', credit: 1 },
+            { subname: 'Digital Ckt design Lab', credit: 1 },
+            { subname: 'Electronics Circuit Lab', credit: 1 },
         ]
+
     };
 
     const gradeMap = {10: "A+", 9: "A", 8: "B+", 7: "B", 6: "C", 5: "D", 4: "S", 3: "F", 2: "F", 1: "F", 0: "F"};
