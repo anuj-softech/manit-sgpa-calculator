@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #e3ffd1;
             text-align: center;
             padding: 0;
             margin: 0;
@@ -59,7 +59,7 @@
             font-size: 20px;
             font-weight: bold;
             margin-top: 10px;
-            color: #333;
+            color: #02006e;
         }
     </style>
 </head>
@@ -225,7 +225,7 @@
         });
 
         let gpa = (totalGradePoints / totalCredits).toFixed(2);
-        document.getElementById("gpaResult").innerText = `Credits obtained : ${totalGradePoints/10} / ${totalCredits}  SGPA: ${gpa}`;
+        document.getElementById("gpaResult").innerText = `SGPA: ${gpa}  \n    Credits: ${totalGradePoints/10}/${totalCredits}`;
     }
 
     // Load semester 1 by default
