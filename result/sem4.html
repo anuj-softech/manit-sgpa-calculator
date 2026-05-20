@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semester 4 Results Dashboard</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.875rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+
+        .btn-parse {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            align-self: flex-start;
+        }
+
+        .btn-parse:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .subject-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .subject-title {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .component-breakdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .comp-pill {
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: inline-flex;
+            gap: 0.35rem;
+        }
+
+        .comp-pill strong {
+            color: var(--primary);
+        }
+
+        .grade-badge {
+            background-color: #e0f2fe;
+            color: var(--primary);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+
+        .total-marks-badge {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .sgpa-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .sgpa-panel h2 {
+            color: #065f46;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .sgpa-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error {
+            color: #ef4444;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Semester 4 Result Viewer</h1>
+        <p>Paste your full nested JSON structure below to generate your clean scorecard.</p>
+    </header>
+
+    <div class="card upload-section">
+        <textarea id="jsonInput" placeholder="Paste your raw JSON here..."></textarea>
+        <button class="btn-parse" onclick="processData()">Generate Table</button>
+        <div id="errorMsg" class="error hidden"></div>
+    </div>
+
+    <div id="resultSection" class="card hidden">
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Subject ID</th>
+                    <th>Subject Details & Breakdown</th>
+                    <th>Credits</th>
+                    <th>Total Marks</th>
+                    <th>Grade</th>
+                    <th>Points</th>
+                    <th>Submitted On</th>
+                </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="sgpa-panel">
+            <div>
+                <h2>Semester Grade Point Average (SGPA)</h2>
+                <p style="color: #065f46; font-size: 0.875rem; margin-top: 0.25rem;">Weighted average based on credits</p>
+            </div>
+            <div class="sgpa-value" id="sgpaDisplay">0.00</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatDate(dateStr) {
+        if (!dateStr || dateStr === '-') return '-';
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            }) + ' ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        } catch(e) {
+            return dateStr;
+        }
+    }
+
+    function processData() {
+        const rawData = document.getElementById('jsonInput').value;
+        const errorMsg = document.getElementById('errorMsg');
+        const resultSection = document.getElementById('resultSection');
+        const tableBody = document.getElementById('tableBody');
+        const sgpaDisplay = document.getElementById('sgpaDisplay');
+
+        errorMsg.classList.add('hidden');
+
+        try {
+            const parsedJSON = JSON.parse(rawData);
+            let courses = [];
+
+            Object.values(parsedJSON).forEach(item => {
+                let semReg = null;
+                if (item && item.semRegInfo) {
+                    semReg = item.semRegInfo;
+                } else if (Array.isArray(item)) {
+                    const target = item.find(el => el && el.semRegInfo);
+                    if (target) semReg = target.semRegInfo;
+                }
+
+                if (!semReg) return;
+
+                if (semReg.regSemesterTypeIdCode === 3 || semReg.regSemesterTypeIdCode === "3") {
+                    const gradeInfo = semReg.semRegSubjectGrade || {};
+                    const subMaster = gradeInfo.subjectMaster || {};
+                    const gradeMaster = gradeInfo.gradeCodeMaster || {};
+
+                    let finalTotalMarks = '-';
+                    let componentsList = [];
+
+                    // AGGRESSIVE DATA UNPACKING
+                    let rawMarksData = gradeInfo.marksObtained;
+
+                    // 1. If wrapped in an array, unwrap it first
+                    if (Array.isArray(rawMarksData) && rawMarksData.length > 0) {
+                        rawMarksData = rawMarksData[0];
+                    }
+
+                    // 2. If it's a string, attempt to parse it
+                    if (typeof rawMarksData === 'string') {
+                        let trimmed = rawMarksData.trim();
+                        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                            try {
+                                rawMarksData = JSON.parse(trimmed);
+                            } catch (e) {
+                                console.warn("Failed to parse inner JSON string", e);
+                            }
+                        }
+                    }
+
+                    // 3. Extract the actual values
+                    if (rawMarksData && typeof rawMarksData === 'object') {
+
+                        // Extract Total Marks
+                        if (rawMarksData.totalMarksObtained) {
+                            let tm = rawMarksData.totalMarksObtained;
+                            finalTotalMarks = Array.isArray(tm) ? tm[0] : tm;
+                        }
+
+                        // Extract Components
+                        if (rawMarksData.studentGradeEntryComponents && Array.isArray(rawMarksData.studentGradeEntryComponents)) {
+                            componentsList = rawMarksData.studentGradeEntryComponents.map(c => {
+                                const internal = (c.componentNameWithMarks && Array.isArray(c.componentNameWithMarks))
+                                    ? c.componentNameWithMarks[0]
+                                    : (c.componentNameWithMarks || {});
+
+                                let name = internal.componentName;
+                                name = Array.isArray(name) ? name[0] : (name || 'Assessment');
+
+                                let score = internal.componentMarks;
+                                score = Array.isArray(score) ? score[0] : (score || '0');
+
+                                return { name, score };
+                            });
+                        }
+                    } else if (rawMarksData !== undefined && rawMarksData !== null) {
+                        // Fallback if it's just a raw number/string after all
+                        finalTotalMarks = String(rawMarksData);
+                    }
+
+                    courses.push({
+                        subjectMasterId: semReg.subjectMasterId ?? '-',
+                        subname: subMaster.subname ?? 'Unknown Subject',
+                        credit: parseFloat(subMaster.credit) || 0,
+                        marksObtained: finalTotalMarks,
+                        components: componentsList,
+                        gradeCodeValue: gradeMaster.gradeCodeValue ?? '-',
+                        gradePointValue: parseFloat(gradeMaster.gradePointValue) || 0,
+                        gradeSubmittedOn: gradeInfo.gradeSubmittedOn ?? '-'
+                    });
+                }
+            });
+
+            if (courses.length === 0) {
+                throw new Error("No subjects found for Semester Type Code 3.");
+            }
+
+            let totalCreditPoints = 0;
+            let totalCredits = 0;
+            let tableHTML = "";
+
+            courses.forEach(course => {
+                totalCredits += course.credit;
+                totalCreditPoints += (course.credit * course.gradePointValue);
+
+                let componentHTML = "";
+                if (course.components.length > 0) {
+                    componentHTML = `<div class="component-breakdown">`;
+                    course.components.forEach(c => {
+                        let parsedScore = parseFloat(c.score);
+                        let displayScore = isNaN(parsedScore) ? c.score : parsedScore.toFixed(1);
+                        componentHTML += `
+                            <div class="comp-pill">
+                                <span>${c.name}:</span><strong>${displayScore}</strong>
+                            </div>
+                        `;
+                    });
+                    componentHTML += `</div>`;
+                }
+
+                let parsedTotal = parseFloat(course.marksObtained);
+                let displayTotal = isNaN(parsedTotal) ? course.marksObtained : parsedTotal.toFixed(2);
+
+                tableHTML += `
+                    <tr>
+                        <td><code style="color:var(--text-muted)">${course.subjectMasterId}</code></td>
+                        <td>
+                            <div class="subject-cell">
+                                <span class="subject-title">${course.subname}</span>
+                                ${componentHTML}
+                            </div>
+                        </td>
+                        <td><strong>${course.credit}</strong></td>
+                        <td><span class="total-marks-badge">${displayTotal}</span></td>
+                        <td><span class="grade-badge">${course.gradeCodeValue}</span></td>
+                        <td><strong>${course.gradePointValue}</strong></td>
+                        <td style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">
+                            ${formatDate(course.gradeSubmittedOn)}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const sgpa = totalCredits > 0 ? (totalCreditPoints / totalCredits).toFixed(2) : "0.00";
+
+            tableBody.innerHTML = tableHTML;
+            sgpaDisplay.innerText = sgpa;
+            resultSection.classList.remove('hidden');
+
+        } catch (err) {
+            errorMsg.innerText = "Error parsing structure: " + err.message;
+            errorMsg.classList.remove('hidden');
+            resultSection.classList.add('hidden');
+        }
+    }
+</script>
+</body>
+</html>
